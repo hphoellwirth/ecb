@@ -17,6 +17,8 @@ import pandas as pd
 import ssl
 import os
 import time
+import string
+from datetime import datetime as dt
 
 os.chdir("/Users/Hans-Peter/Documents/Masters/14D010/project/code")
 
@@ -25,7 +27,7 @@ os.chdir("/Users/Hans-Peter/Documents/Masters/14D010/project/code")
 # ----------------------------------------------------------------------
 
 def get_HTML(url):
-	# function loads html source code of given url
+    # function loads html source code of given url
     ssl._create_default_https_context = ssl._create_unverified_context
     user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
     headers = {'User-Agent':user_agent,}
@@ -35,28 +37,60 @@ def get_HTML(url):
     soup = BeautifulSoup(html, 'html.parser')
     return soup
 
+def get_president(date):
+    sw1 = dt.strptime("31/10/2003", "%d/%m/%Y")
+    sw2 = dt.strptime("31/10/2011", "%d/%m/%Y")
+    d = dt.strptime(date, "%d/%m/%Y")
+
+    if d <= sw1:
+        return 'Duisenberg'
+    if d <= sw2:
+        return 'Trichet'
+    return 'Draghi'
+
+def get_statement(url, president):
+    # function extracts transcript for a given statement (identified by url)
+
+    # get HTML soup
+    soup = get_HTML(url)
+    article = soup.find('article')
+    paragraphs = article.find_all('p')
+
+    # concat paragaphs to one string
+    speech = ''
+    for i in range(1,len(paragraphs)): # ignore first paragraph (link to Q&A)
+        paragraph = paragraphs[i].text.strip().replace('\xa0', ' ')
+        paragraph = paragraph.replace(president + ': ', '') # filter header of answers
+
+        if not paragraph.startswith('Question:'): # filter questions
+            speech += paragraph + ' '
+
+    return speech
+
 def get_statements(year):
-	# function loads all historic introduction statements from the ECB webpage
+    # function loads all historic introduction statements from the ECB webpage
     # and returns a data frame containing the date and link to each statement
 
-	# get HTML Soup
-	url = "https://www.ecb.europa.eu/press/pressconf/" + str(year) + "/html/index.en.html"
-	year_soup = get_HTML(url)
+    # get HTML soup
+    url = "https://www.ecb.europa.eu/press/pressconf/" + str(year) + "/html/index.en.html"
+    year_soup = get_HTML(url)
 
-	# isolate statement dates and links
-	dates = year_soup.find_all("dt")
-	links = year_soup.findAll("span", { "class" : "doc-title" })
+    # isolate statement dates and links
+    dates = year_soup.find_all("dt")
+    links = year_soup.findAll("span", { "class" : "doc-title" })
 
-	# store result in pandas data frame
-	d = []
+    # store result in pandas data frame
+    d = []
 
-	for i in range(len(links)):
-		date = dates[i].text.strip()
-		link = 'https://www.ecb.europa.eu' + links[i].find('a')['href']
-		d.append({'Date': date, 'Link': link})
+    for i in range(len(links)):
+        date = dates[i].text.strip()
+        pres = get_president(date)
+        link = 'https://www.ecb.europa.eu' + links[i].find('a')['href']
+        text = get_statement(link, pres)
+        d.append({'Date': date, 'President': pres, 'Text': text})
 
-	return pd.DataFrame(d)
-
+    return pd.DataFrame(d)
+    
 
 # ----------------------------------------------------------------------
 # Run web scrapping
