@@ -58,12 +58,13 @@ def get_statement(url, president):
 
     # concat paragaphs to one string
     speech = ''
-    for i in range(1,len(paragraphs)): # ignore first paragraph (link to Q&A)
+    for i in range(len(paragraphs)):
         paragraph = paragraphs[i].text.strip().replace('\xa0', ' ')
         paragraph = paragraph.replace(president + ': ', '') # filter header of answers
 
-        if not paragraph.startswith('Question:'): # filter questions
-            speech += paragraph + ' '
+        if not ('transcript' in paragraph and 'questions' in paragraph and 'answers' in paragraph): # filter first paragraph (link to Q&A)
+            if not paragraph.startswith('Question:'): # filter questions
+                speech += paragraph + ' '
 
     return speech
 
@@ -90,7 +91,7 @@ def get_statements(year):
         d.append({'Date': date, 'President': pres, 'Text': text})
 
     return pd.DataFrame(d)
-    
+
 
 # ----------------------------------------------------------------------
 # Run web scrapping
@@ -98,8 +99,27 @@ def get_statements(year):
 
 # download date and links for each ECB introductory statement
 # and store each data frame in a CSV file
-for year in range(1998,2018):
+first = True
+for year in range(1998,2000):
     df = get_statements(year)
-    df.to_csv("../data/"+str(year)+".csv", index=False, encoding='utf-8')
-    #print('.', end='')
+    df['Date'] = pd.to_datetime(df.Date, format="%d/%m/%Y")
+    #df.to_csv("../data/"+str(year)+".csv", index=False, encoding='utf-8')
+
+    if first:
+        cdf = df
+        first = False
+    else:
+        cdf = pd.concat([cdf, df], ignore_index=True)
+
     time.sleep(1)
+
+
+
+
+
+
+
+
+
+# and a single CSV file combining all statements
+cdf.sort_values('Date').to_csv("../data/combined.csv", index=False, encoding='utf-8')
