@@ -100,10 +100,10 @@ def get_statements(year):
 # download date and links for each ECB introductory statement
 # and store each data frame in a CSV file
 first = True
-for year in range(1998,2000):
+for year in range(1998,2018):
     df = get_statements(year)
     df['Date'] = pd.to_datetime(df.Date, format="%d/%m/%Y")
-    #df.to_csv("../data/"+str(year)+".csv", index=False, encoding='utf-8')
+    df.to_csv("../data/"+str(year)+".csv", index=False, encoding='utf-8')
 
     if first:
         cdf = df
@@ -112,14 +112,6 @@ for year in range(1998,2000):
         cdf = pd.concat([cdf, df], ignore_index=True)
 
     time.sleep(1)
-
-
-
-
-
-
-
-
 
 # and a single CSV file combining all statements
 cdf.sort_values('Date').to_csv("../data/combined.csv", index=False, encoding='utf-8')
