@@ -89,6 +89,7 @@ def remove_topic_stop_words(text, threshold = 0.1):
 # read data file
 data = pd.read_table('../data/combined.csv', sep=',', encoding='utf-8')
 text_raw = data['Text']
+date_raw = data['Date']
 
 # text pre-processing
 text_cleaned = clean_text(text_raw)
