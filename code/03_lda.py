@@ -70,11 +70,20 @@ def plot_topic_distr(doc_topics, dates, file_name=None):
 # ----------------------------------------------------------------------
 # Run LDA analysis
 # ----------------------------------------------------------------------
+def topic_distribution_plot(text, K):
+    # fit LDA model for K topics and plot (+ save) result
+    text_dtm = form_docterm_matrix(text)
+    model = lda.LDA(n_topics=K, n_iter=1000, alpha=0.1, eta=0.1, random_state=1)
+    model.fit(text_dtm)
+    topic_words = model.topic_word_
+    plot_topic_distr(doc_topics, date_raw, file_name='topicDistr_K'+str(K))
+
+topic_distribution_plot(text_process, 2)
 
 text_dtm = form_docterm_matrix(text_process)
 
 # fit LDA model
-model = lda.LDA(n_topics=3, n_iter=1000, alpha=0.1, eta=0.1, random_state=1)
+model = lda.LDA(n_topics=4, n_iter=1000, alpha=0.1, eta=0.1, random_state=1)
 model.fit(text_dtm)
 
 # store result
@@ -83,4 +92,4 @@ topic_words = model.topic_word_
 log_likelihoods = model.loglikelihoods_
 
 # plot topic distributions over time
-plot_topic_distr(doc_topics, date_raw, file_name='topicDistr_K3')
+plot_topic_distr(doc_topics, date_raw, file_name='topicDistr_K4')
