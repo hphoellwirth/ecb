@@ -15,6 +15,7 @@ import pandas as pd
 import lda
 import os
 import datetime
+import Image
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
@@ -44,7 +45,7 @@ def form_docterm_matrix(text_terms):
 # ----------------------------------------------------------------------
 # Plotting functions
 # ----------------------------------------------------------------------
-def plot_topic_distr(doc_topics, dates):
+def plot_topic_distr(doc_topics, dates, file_name=None):
     # function plots topic distribution (doc_topoics) over time (dates)
     T3 = pd.DataFrame(doc_topics)
     T3.index = list(pd.to_datetime(dates))
@@ -60,7 +61,10 @@ def plot_topic_distr(doc_topics, dates):
     plt.ylabel('topic distribution')
     plt.legend()
     fig.autofmt_xdate()
-    plt.show()
+    if not file_name:
+        plt.show()
+    else:
+        plt.savefig('../images/'+ file_name +'.png', dpi=300)
     plt.close()
 
 # ----------------------------------------------------------------------
@@ -79,4 +83,4 @@ topic_words = model.topic_word_
 log_likelihoods = model.loglikelihoods_
 
 # plot topic distributions over time
-plot_topic_distr(doc_topics, date_raw)
+plot_topic_distr(doc_topics, date_raw, file_name='topicDistr_K3')
