@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 from sklearn.feature_extraction.text import CountVectorizer
+from wordcloud import WordCloud
 
 os.chdir("/Users/Hans-Peter/Documents/Masters/14D010/project/code")
 
@@ -99,27 +100,33 @@ topic_distribution_plot(text_process, 3)
 topic_distribution_plot(text_process, 4)
 
 # fit LDA model
+K=3
 text_dtm = form_docterm_matrix(text_process)
-model = lda.LDA(n_topics=4, n_iter=1000, alpha=0.1, eta=0.1, random_state=1)
+model = lda.LDA(n_topics=K, n_iter=1000, alpha=0.1, eta=0.1, random_state=1)
 model.fit(text_dtm)
 
-help(model)
-
-# store result
-doc_topics = model.doc_topic_
-topic_words = model.topic_word_
-log_likelihoods = model.loglikelihoods_
-model.nzw_
-
-np.argpartition(model.nzw_[1], -5)[-5:]
-
-
-voc = get_vocabulary(text_process)
+# plot topic distributions over time
+plot_topic_distr(model.doc_topic_, date_raw)
 
 # most common words in each topic
-for k in 4:
-    wl = [gibbs.voc[n] for n in np.argpartition(gibbs.mean_B()[k], -10)[-10:]]
+voc = get_vocabulary(text_process)
+for k in range(K):
+    wl = [voc[n] for n in np.argpartition(model.nzw_[k], -10)[-10:]]
     print(k,':',wl)
 
-# plot topic distributions over time
-plot_topic_distr(doc_topics, date_raw, file_name='topicDistr_K'+str(4))
+help(WordCloud().fit_words)
+
+wl = [voc[n] for n in np.argpartition(model.nzw_[0], -10)[-10:]]
+wl = [model.nzw_[0,n] for n in np.argpartition(model.nzw_[0], -10)[-10:]]
+wl = [(voc[n], model.nzw_[0,n]) for n in np.argpartition(model.nzw_[0], -10)[-10:]]
+
+dict(wl)
+
+# plot word clouds
+for k in range(K):
+    wl = [(voc[n], model.nzw_[k,n]) for n in np.argpartition(model.nzw_[k], -10)[-10:]]
+    plt.figure()
+    plt.imshow(WordCloud().fit_words(dict(wl)))
+    plt.axis("off")
+    plt.title("Topic #" + str(k))
+    plt.show()
