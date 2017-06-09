@@ -42,6 +42,21 @@ def form_docterm_matrix(text_terms):
     #years = text_grouped_unlisted.index
     #D = len(years)
 
+def get_vocabulary(text_terms):
+    # get vocabulary list from text-term list
+    text_joined = text_terms.copy()
+    count = 0
+    for i in text_joined:
+        text_joined[text_terms.index[count]] = " ".join(i)
+        count += 1
+
+    countvec = CountVectorizer()
+    dtm = countvec.fit_transform(text_joined)
+    voc = countvec.get_feature_names()
+    return voc
+
+
+
 # ----------------------------------------------------------------------
 # Plotting functions
 # ----------------------------------------------------------------------
@@ -75,21 +90,36 @@ def topic_distribution_plot(text, K):
     text_dtm = form_docterm_matrix(text)
     model = lda.LDA(n_topics=K, n_iter=1000, alpha=0.1, eta=0.1, random_state=1)
     model.fit(text_dtm)
-    topic_words = model.topic_word_
+    doc_topics = model.doc_topic_
     plot_topic_distr(doc_topics, date_raw, file_name='topicDistr_K'+str(K))
 
+# create topic distribution plots for various K
 topic_distribution_plot(text_process, 2)
-
-text_dtm = form_docterm_matrix(text_process)
+topic_distribution_plot(text_process, 3)
+topic_distribution_plot(text_process, 4)
 
 # fit LDA model
+text_dtm = form_docterm_matrix(text_process)
 model = lda.LDA(n_topics=4, n_iter=1000, alpha=0.1, eta=0.1, random_state=1)
 model.fit(text_dtm)
+
+help(model)
 
 # store result
 doc_topics = model.doc_topic_
 topic_words = model.topic_word_
 log_likelihoods = model.loglikelihoods_
+model.nzw_
+
+np.argpartition(model.nzw_[1], -5)[-5:]
+
+
+voc = get_vocabulary(text_process)
+
+# most common words in each topic
+for k in 4:
+    wl = [gibbs.voc[n] for n in np.argpartition(gibbs.mean_B()[k], -10)[-10:]]
+    print(k,':',wl)
 
 # plot topic distributions over time
-plot_topic_distr(doc_topics, date_raw, file_name='topicDistr_K4')
+plot_topic_distr(doc_topics, date_raw, file_name='topicDistr_K'+str(4))
