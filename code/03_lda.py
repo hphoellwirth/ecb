@@ -15,7 +15,7 @@ import pandas as pd
 import lda
 import os
 import datetime
-import Image
+#import Image
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
@@ -83,6 +83,19 @@ def plot_topic_distr(doc_topics, dates, file_name=None):
         plt.savefig('../images/'+ file_name +'.png', dpi=300)
     plt.close()
 
+def plot_wordcloud(voc, freq_matrix, k, n_words=25, file_name=None):
+    # plot word cloud for topic k with n_words
+    word_freq = [(voc[n], freq_matrix[k,n]) for n in np.argpartition(freq_matrix[k], -n_words)[-n_words:]]
+    word_cloud = WordCloud(background_color='white',width=1200,height=1000).fit_words(dict(word_freq))
+    plt.figure()
+    plt.imshow(word_cloud)
+    plt.axis("off")
+    plt.title('Topic ' + str(k+1))
+    if not file_name:
+        plt.show()
+    else:
+        plt.savefig('../images/'+ file_name +'.png', dpi=150)
+
 # ----------------------------------------------------------------------
 # Run LDA analysis
 # ----------------------------------------------------------------------
@@ -98,6 +111,8 @@ def topic_distribution_plot(text, K):
 topic_distribution_plot(text_process, 2)
 topic_distribution_plot(text_process, 3)
 topic_distribution_plot(text_process, 4)
+topic_distribution_plot(text_process, 5)
+
 
 # fit LDA model
 K=3
@@ -108,25 +123,12 @@ model.fit(text_dtm)
 # plot topic distributions over time
 plot_topic_distr(model.doc_topic_, date_raw)
 
-# most common words in each topic
+# find most common words in each topic
 voc = get_vocabulary(text_process)
 for k in range(K):
     wl = [voc[n] for n in np.argpartition(model.nzw_[k], -10)[-10:]]
     print(k,':',wl)
 
-help(WordCloud().fit_words)
-
-wl = [voc[n] for n in np.argpartition(model.nzw_[0], -10)[-10:]]
-wl = [model.nzw_[0,n] for n in np.argpartition(model.nzw_[0], -10)[-10:]]
-wl = [(voc[n], model.nzw_[0,n]) for n in np.argpartition(model.nzw_[0], -10)[-10:]]
-
-dict(wl)
-
 # plot word clouds
 for k in range(K):
-    wl = [(voc[n], model.nzw_[k,n]) for n in np.argpartition(model.nzw_[k], -10)[-10:]]
-    plt.figure()
-    plt.imshow(WordCloud().fit_words(dict(wl)))
-    plt.axis("off")
-    plt.title("Topic #" + str(k))
-    plt.show()
+    plot_wordcloud(voc, model.nzw_, k, n_words=50, file_name='wordCloud_K3_'+str(k+1))

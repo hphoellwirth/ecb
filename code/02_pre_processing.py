@@ -76,7 +76,7 @@ def remove_topic_stop_words(text, threshold = 0.1):
     cnt_tf = Counter(text.sum())
     cnt_idf = Counter(text.apply(lambda x: list(set(x))).sum())
     stop = [w for w in voc if ((1 + np.log(cnt_tf[w])) * np.log(D / cnt_idf[w])) < threshold]
-    print(stop)
+    print(sorted(stop))
 
     # filter stopwords from text
     return text.apply(lambda d: [w for w in d if w not in stop])
@@ -90,6 +90,8 @@ def remove_topic_stop_words(text, threshold = 0.1):
 data = pd.read_table('../data/combined.csv', sep=',', encoding='utf-8')
 text_raw = data['Text']
 date_raw = data['Date']
+
+len(text_raw)
 
 # text pre-processing
 text_cleaned = clean_text(text_raw)
