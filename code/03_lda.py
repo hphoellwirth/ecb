@@ -61,7 +61,7 @@ def get_vocabulary(text_terms):
 # ----------------------------------------------------------------------
 # Plotting functions
 # ----------------------------------------------------------------------
-def plot_topic_distr(doc_topics, dates, file_name=None):
+def plot_topic_distr(doc_topics, dates, K, file_name=None):
     # function plots topic distribution (doc_topoics) over time (dates)
     T3 = pd.DataFrame(doc_topics)
     T3.index = list(pd.to_datetime(dates))
@@ -75,7 +75,7 @@ def plot_topic_distr(doc_topics, dates, file_name=None):
     plt.title('Topic distribution over years')
     plt.xlabel('year')
     plt.ylabel('topic distribution')
-    plt.legend()
+    plt.legend([str(i+1) for i in list(range(K))])
     fig.autofmt_xdate()
     if not file_name:
         plt.show()
@@ -86,7 +86,7 @@ def plot_topic_distr(doc_topics, dates, file_name=None):
 def plot_wordcloud(voc, freq_matrix, k, n_words=25, file_name=None):
     # plot word cloud for topic k with n_words
     word_freq = [(voc[n], freq_matrix[k,n]) for n in np.argpartition(freq_matrix[k], -n_words)[-n_words:]]
-    word_cloud = WordCloud(background_color='white',width=1200,height=1000).fit_words(dict(word_freq))
+    word_cloud = WordCloud(background_color='white',width=1200,height=1000,margin=0).fit_words(dict(word_freq))
     plt.figure()
     plt.imshow(word_cloud)
     plt.axis("off")
@@ -105,14 +105,12 @@ def topic_distribution_plot(text, K):
     model = lda.LDA(n_topics=K, n_iter=1000, alpha=0.1, eta=0.1, random_state=1)
     model.fit(text_dtm)
     doc_topics = model.doc_topic_
-    plot_topic_distr(doc_topics, date_raw, file_name='topicDistr_K'+str(K))
+    plot_topic_distr(doc_topics, date_raw, K, file_name='topicDistr_K'+str(K))
 
 # create topic distribution plots for various K
 topic_distribution_plot(text_process, 2)
 topic_distribution_plot(text_process, 3)
 topic_distribution_plot(text_process, 4)
-topic_distribution_plot(text_process, 5)
-
 
 # fit LDA model
 K=3
@@ -121,13 +119,15 @@ model = lda.LDA(n_topics=K, n_iter=1000, alpha=0.1, eta=0.1, random_state=1)
 model.fit(text_dtm)
 
 # plot topic distributions over time
-plot_topic_distr(model.doc_topic_, date_raw)
+plot_topic_distr(model.doc_topic_, date_raw, K)
 
 # find most common words in each topic
 voc = get_vocabulary(text_process)
-for k in range(K):
-    wl = [voc[n] for n in np.argpartition(model.nzw_[k], -10)[-10:]]
-    print(k,':',wl)
+topic_word = model.topic_word_
+n_top_words = 10
+for i, topic_dist in enumerate(topic_word):
+    topic_words = np.array(voc)[np.argsort(topic_dist)][:-n_top_words:-1]
+    print('Topic {}: {}'.format(i+1, ' '.join(topic_words)))
 
 # plot word clouds
 for k in range(K):
