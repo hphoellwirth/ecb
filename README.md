@@ -1,7 +1,7 @@
 # Text Mining Project
-Title: Analyse ECB's official press statements
-Author: Hans-Peter Hoellwirth
-Date: 06.2017
+Title: Analyse ECB's official press statements<br>
+Author: Hans-Peter Hoellwirth<br>
+Date: 06.2017<br>
 
 ## Data
 Web scrapping official press statements published at https://www.ecb.europa.eu/press/pressconf/2017/html/index.en.html for the years 1998-2017.
@@ -10,7 +10,7 @@ Web scrapping official press statements published at https://www.ecb.europa.eu/p
 Latent Dirichlet Allocation (LDA) and Structural Topic Model (STM) for 3 and 10 topics
 
 ## Main Result(s)
-3 topics: Topics are mainly associated to presidencies
+3 topics: Topics are mainly associated to presidencies<br>
 10 topics: Most topics are associated to major events and policies in ECB's history
 
 ## Code Instructions

@@ -91,8 +91,6 @@ data = pd.read_table('../data/combined.csv', sep=',', encoding='utf-8')
 text_raw = data['Text']
 date_raw = data['Date']
 
-len(text_raw)
-
 # text pre-processing
 text_cleaned = clean_text(text_raw)
 text_process = remove_topic_stop_words(text_cleaned, threshold=1.0)
