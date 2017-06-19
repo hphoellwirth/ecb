@@ -19,3 +19,5 @@ Run in the following order:
  - 02_pre_processing.py: Requires file data/combined.csv to exist
  - 03_lda.py: Takes output of previous step (text_process) as input
  - 04_stm.R: Requires file data/combined.csv to exist. Independently executable from steps 2 and 3
+
+ Note: Before execution, update the working directory in each code file.
